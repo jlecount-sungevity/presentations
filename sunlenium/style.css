@@ -1,8 +1,0 @@
-.bullets > ul > li {
-    padding: 25px;
-    text-align: left;
-}
-
-li {
-list-style:square url("images/sqpurple.gif");
-}
