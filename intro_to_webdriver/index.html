@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(http://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Intro To WebDriver #
+
+---
+# What is WebDriver?
+* Browser automation API
+* Supports languages: Java, Ruby, C#, Python, and more
+* Supports operating systems: Linux, Windows, OSX, Android, IOS
+* Supports browsers: Chrome, Firefox, IE, Opera, iPhone, Android
+* simulates how a USER interacts with a browser.  
+* Can driver local browsers or those on another machine
+
+---
+# History
+---
+  Selenium began as 2 technologies: selenium-RC and selenium-IDE.
+
+  * RC was implemented in javascript
+  * IDE was a record/playback tool
+  * somewhat buggy
+  * limited by javascript in browser
+
+---
+# Introducing WebDriver
+---
+
+  WebDriver is written atop plugins built into browsers
+  * more stable cross-browser behavior
+  * interacts more consistently like a user does with the browser, not like javascript does, as in RC
+  * More browser support including mobile
+
+---
+# Basic WebDriver Test
+---
+  
+```python
+  from selenium.webdriver.common.by import By
+  from hamcrest import is_, assert_that
+
+  class MyWebDriverTest(UnitTest):
+
+    def test_all_the_things(self):
+      self.driver.get("http://google.com")
+      search_box_element = self.driver.find_element(By.ID, "gbqfq")
+      search_box_element.send_keys("wow bob wow")
+      search_button = self.driver.find_element(By.NAME, "btnG")
+      search_button.click()
+      assert_that(self.driver.title, is_('wow bob wow - Google Search'))
+```
+---
+# Problems
+---
+
+```python
+  from selenium.webdriver.common.by import By
+  from hamcrest import is_, assert_that
+
+  class MyWebDriverTest(UnitTest):
+
+    def test_simple_search(self):
+      self.driver.get("http://google.com")
+      search_box_element = self.driver.find_element(By.ID, "gbqfq")
+      search_box_element.send_keys("wow bob wow")
+      search_button = self.driver.find_element(By.NAME, "btnG")
+      search_button.click()
+      assert_that(self.driver.title, is_('wow bob wow - Google Search'))
+```
+
+* Hard to maintain.  
+  If you had 50 tests that tested google search and the locators changed, you'd have to change at least 50 places.
+* Hard to read.  Not easy to quickly tell what's happening here.
+* no way to handle alternate environments such as 'dev' or 'qa' -- URL is hard coded, etc.
+
+---
+# Answer -- PageObjects
+---
+
+```python
+  from selenium.webdriver.common.by import By
+  from hamcrest import is_, assert_that
+
+  class MyWebDriverTest(UnitTest):
+
+    def test_simple_search(self):
+      search_page = GoogleSearchPage(
+        driver=self.driver, 
+        url=self.config['google_search_url']
+      )
+      result_page = search_page.search_for("wow bob wow")
+      assert_that(result_page.title, is_('wow bob wow - Google Search'))
+```
+
+* Consolidates page stuff with an object that subclasses a base Page
+* Easier to maintain -- if locators change, you change them in one place, not in your tests
+* Tests are easy to read
+
+---
+# More Benefits of Page Objects
+---
+# They are your API
+* Page Objects are a UI-centric API to your application.  
+---
+# They make your tests robust
+* If the specifics of the UI details change, your tests shouldn't have to
+---
+# Tests know what.  Pages know how
+* Tests know what they want done.  Page objects know how to do it.  Don't cross those boundaries
+---
+# Holmium
+---
+# Holmium is a python PageObject library
+* We use it
+* I have forked the repo for extensions / bug fixes
+* provides layers atop the standard webdriver 'WebElement' class.
+* Supports reusable page 'sections', element lookups, much more
+
+# Sunlenium
+
+* Our framework
+* extends holmium.core
+* Adds the following:
+    * environment-sensitive configuration 
+    * testcase dependencies
+    * cleanup of salesforce objects created during a test
+    * salesforce REST integration via getters and setters.
+    * interactive execution and debugging
+
+---
+# Environment-sensitive configuration
+```python
+  def some_test(self):
+    url = self.config_value("oursungevity/url")
+```
+* Knows if you're in UAT, QAE, Prod
+* returns right url for that env
+* Generally, you don't even have to do that.  Just depend on oursungevity!  (Next slide)
+
+# Testcase Dependencies
+```python
+    @requires(test_dependency.Providers.Lead, test_dependency.Providers.OurSungevityLogin)
+    def test_login_to_oursungevity(self, the_lead, oursungevity):
+        assert_that(oursungevity, is_not(None))
+```
+
+* That is all you need to create a new Lead and login to oursungevity as it
+---
+# Auto cleanup
+```python
+    @requires(test_dependency.Providers.Lead, test_dependency.Providers.OurSungevityLogin)
+    def test_login_to_oursungevity(self, the_lead, oursungevity):
+        assert_that(oursungevity, is_not(None))
+```
+
+* At the end of this test (which creates a lead), the lead is deleted in salesforce automatically.
+---
+
+# Salesforce REST integration
+
+* Interactive example:
+
+```python
+self.person = { 'email' : "sometest1234@test.com", 'phone_number' : '(510) 867-5309' }
+self.crate_lead()
+Warning: No referral code given.  Using JLECOUNT
+Creating a lead...
+Activating lead...
+Resetting password for  to zvfsagqagr
+self.create_opportunity()
+
+In [6]: self.opportunity['iQuote_Request_Date__c']
+Out[6]: u'2014-09-22T20:55:36.000+0000'
+
+In [8]: self.opportunity.populate_qa_fields()
+```
+---
+
+# Interactive debugging
+* interactive console using ipython
+* will drop into debugger if tests have errors
+* can drive the browser one step at a time from the console, just as if you were in a testcase.
+
+      </textarea>
+    <script src="http://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
