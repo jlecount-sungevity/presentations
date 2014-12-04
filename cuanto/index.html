@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(http://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Lab Day: Storing Test Results in a Database
+
+---
+# Goal
+* Searchable database of unit, functional, integration test results that Jenkins generates
+* Basic UI atop that database
+* Well-integrated into the Jenkins job so as not to litter the job with cruft
+
+---
+# What Was Done
+* Grabbed cuanto (http://trackyourtests.com), installed on Jenkins
+* Wrote a Jenkins plugin to grab junit-style xml reports, parse them and send to cuanto
+* Imported a number of sample projects in Cuanto
+---
+# What's Wrong With Just Having HTML Reports in Jenkins?
+## _Why bother with a database anyway?_
+---
+# The Why Of It
+
+* Test results in HTML are only useful at one point in time.  Have almost no historical value.
+* Not (conveniently) machine readable
+* If not machine readable, the usefulness is hugely reduced.
+---
+# Use Cases for a Test Results DB
+## Build Pipeline
+## Data Mining 
+---
+
+# Build Pipeline Use Cases
+---
+
+## (Programatically) assert that:
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all tests of a given product pass before allowing a deploy to a non-test environment
+---
+## Assert that:
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all tests on a branch pass before allowing an merge of that branch upstream 
+---
+## Assert that:
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all tests on a set of locally related products pass before deploy or merge, etc
+---
+
+# Data Mining Use Cases
+---
+## Of all the branches this test ran on:
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What branches did this test fail on?  
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What branches did it NOT fail on?
+---
+## Of all the browsers this test ran on:
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Which browsers had failures?
+---
+## What was the first sha these tests started failing on?
+---
+## Show me...
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all test failures that contain the same stack trace
+---
+
+# What's Next?
+* The plugin is installed on Jenkins already
+* Need to resolve network issues to hit Cuanto webapp without SSH tunnel
+* Result collection to be turned on on more builds
+* Figure out what data we want to use
+* Edge cases with importing some junit xml still remain
+
+
+      </textarea>
+    <script src="http://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
