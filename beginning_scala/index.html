@@ -24,10 +24,14 @@ class: center, middle
 # Beginning Scala #
 ---
 # Week 1
+* Why Are You Here?
 * Abstraction
 * Object Oriented Languages
 * Functional Languages
 * Why Scala?
+---
+# Why Are You Here?
+* What's your interest?  Short-term?  Long-term?
 ---
 # Abstraction
 ---
@@ -342,8 +346,6 @@ res21: String = greater than y
 
 _(Note that "if" is a statement in Java and an expression in Scala.)_
 
-<br>
-<br>
 ```scala
 scala> def plusOne(i:Int) : Int = i + 1
 plusOne: (i: Int)Int
@@ -351,6 +353,98 @@ plusOne: (i: Int)Int
 scala> plusOne(5)
 res13: Int = 6
 ```
+---
+# Traits, Classes, Case Classes
+
+When creating classes, these 3 constructs are your bread and butter.
+
+When defining the root of your class hierarchy, you can choose to use a Trait or a Class
+
+* Base classes define a parent object, one that is simpler than its children.
+* A child class _cannot_ have multiple parents.
+
+
+Animal -> Mammal -> Human
+
+either:
+
+```scala
+        class Animal
+        class Mammal(numLegs:Int) extends Animal
+        case class Human(wearsShoes:Boolean) extends Mammal(numLegs=2)
+
+// OR
+
+        trait Animal
+        class Mammal(numLegs:Int) extends Animal
+        case class Human(wearsShoes:Boolean) extends Mammal(numLegs=2)
+```
+---
+
+# Traits
+
+* are methods or values that span classes
+* just like Interfaces in java but can be implemented.
+* A class may implement any number of Traits
+
+```scala
+        trait Animal {
+            val color:String
+            val numLegs:Int
+        }
+
+        //OR
+
+        trait Animal {
+            def color:String
+            def numLegs:Int
+        }
+```
+
+```scala
+        case class Dog(color:String) extends Animal {
+            val numLegs = 4
+        }
+```
+---
+
+# Classes can implement multiple Traits
+
+* You realize not all animals walk!  Refactor time.
+
+```scala
+
+        trait Animal {
+            val color:String
+        }
+
+        trait Walker {
+            val numLegs:Int
+        }
+
+        case class Dog(color:String) extends Animal with Walker {
+            val numLegs = 4
+        }
+
+        val d = Dog("brown")
+
+```
+---
+
+# Base classes
+* Using a base class
+
+```scala
+        class Animal(color:String, numLegs:Int)
+        case class Dog(color:String) extends Animal(color,numLegs=4)
+```
+
+* Remember, a subclass may only have a single parent superclass
+* If you need more parents, use traits
+
+
+<br>
+<br>
 ---
 # Functional Languages (cont.)
 * Programs are created in functional language by chaining expressions.
@@ -627,6 +721,122 @@ def getDinner: Dinner = {
 }
 ```
 ---
+
+## Futures in Scala -- Hypothetical Web Page Link Checker
+
+```scala
+
+def getPages(url:List[URI]):Future[List[WebPage]]
+def getLinks(page:WebPage): Future[List[Link]]
+def checkLink(link:Link):Future[Try[PageCheck]]
+
+val resultList: List[Try[PageCheck]] = for {
+    page <- getPages(urlList)
+    link <- getLinks(page)
+    result <- checkLink(link)
+} yield result
+
+```
+---
+## Recap
+
+* var / val
+* fields
+* superclass/subclass
+* Ranges
+* if -- statement or expression and why?
+* packages
+
+---
+## Something new
+* override modifier
+---
+## A Brief Tour of a Scala project
+* SBT
+* tree structure
+* compiling
+---
+## SBT
+* Simple Build Tool
+* Allows dependencies via ivy
+* Ant vs. Maven
+* compile, test, package, etc
+---
+## Scala projects
+```sh
+├── README.md
+├── build.sbt
+├── config
+│   └── robocode.properties
+├── lib
+│   ├── robocode.jar
+├── project
+│   └── target
+│       └── config-classes
+│           ├── $06a9ab121d566307e388$$anonfun$$sbtdef$1.class
+├── src
+│   └── main
+│       ├── java
+│       │       ├── MyFirstTeam.java
+│       └── scala
+│           └── com
+│               └── sungevity
+│                   └── jlecount
+├                      ── MyRobot.scala
+├── target
+```
+---
+## Packages
+* namespace for work
+
+```
+import com.sungevity.jlecount._
+
+import com.sungevity.jlecount.MyRobot
+```
+
+* indicates that "val x = MyRobot()" points to mine
+---
+## Compiling
+* sbt compile
+* Scalac vs scala
+* Transforms source code into bytecode
+* scala then starts a JVM and runs it
+---
+## Robocode workflow in Short:
+* git clone  git@github.com:jlecount-sungevity/robocode.git
+* git checkout -b my_topic_branch_name
+* Write your robot in src/main/scala/com/sungevity/...
+* commit and push robot
+* Open pull request
+* email whole group
+* merge and enjoy
+---
+## Robocode workflow in Long:
+
+```bash
+git clone  git@github.com:jlecount-sungevity/robocode.git
+git checkout my_topic_branch_name
+```
+* Build a robot by adding one in:
+
+```src/main/scala/com/sungevity/&lt;yournamehere&gt;/ ```
+
+```bash
+git add, git commit, git push origin my_topic_branch_name ...
+```
+* Create a pull request in jlecount-sungevity/robocop repo
+* _EXPLAIN WHY YOUR ROBOT IS AN IMPROVEMENT OVER WHAT YOU STARTED WITH_
+* Send an email to the team with your PR so we can all appreciate your awesomeness
+* We merge.  Pit your bot against somebody else's!
+* See here for more: https://github.com/jlecount-sungevity/robocode
+* Robocode main page: http://robocode.sourceforge.net/
+* Robocode API links: http://robocode.sourceforge.net/docs/robocode/
+* Robocode events your robot can respond to:
+http://robocode.sourceforge.net/docs/robocode/robocode/control/events/IBattleListener.html
+---
+## Please Email Me with Questions / Confusions / Thoughts / Strategies ...
+* jlecount@sungevity.com -- I would love to hear before next week.
 
       </textarea>
     <script src="http://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript">
