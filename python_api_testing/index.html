@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(http://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# API Testing in Python#
+
+---
+# What We Will Accomplish
+* Brief overview of python API testing framework goals
+* Brief overview of what is a REST API?
+* Before you begin...
+* Jumping in: generating a test
+* Filling In The Blanks
+* Running the Test
+* Committing and Pushing to github
+* Tracking results in ATAT and Jenkins
+
+---
+# Goals
+* Simple syntax for writing API tests
+* Integrates with genuser and salesforce
+* Runs on docker or locally
+* Runs against any test env or prod
+* Skeleton test generator for getting started
+---
+# What is a REST API?
+---
+# REST Is About the Nouns
+* Representational State Transfer is what it actually stands for
+* Not the best name
+* Basically provides Create / Read / Update / Delete verbs on Resources (our nouns)
+---
+# Examples:
+---
+
+<br><br>
+```python
+GET /v2/quote/1234
+```
+
+* READ action:  return quote with ID 1234
+* GET should NEVER trigger a change to the resource
+* Doing 2 GETs should always give you the same result
+* (presuming nobody else modified the resource you're getting!)
+---
+<br><br>
+```python
+POST /pet
+    body={'name' : 'Fido', 'type' : 'cute' }
+```
+
+* CREATE action.  Add a new resource.  Takes post params to specify the data
+* Does not provide ID numbers -- that's dictated by the service, but the response is likely to contain the created pet.
+---
+<br><br>
+```python
+PUT /pet
+        body={'id' : 999, 'new_name' : 'Sparky' }
+```
+
+* UPDATE action.  Updates existing resource.  Takes post param 'body' to specify the data
+* Usually will provide an ID to identify what's to be updated
+---
+<br><br>
+```python
+DELETE /pet/999
+```
+
+* DELETE action.  Deletes your pet. :-(
+* Requires an ID in the endpoint, usually, to identify
+---
+# Using This Information with our python test framework...
+---
+# Before you begin...
+* What are you attempting to test?  Is there a spec?  RAML?
+* Test class name
+* Test methods.  What are they validating?
+* Think through your test cases, but don't  put them in testrail!
+---
+# Back to RAML...
+* RAML is what we use for specifying our API behavior
+* It is the definitive truth.
+* Some level of the code probably was generated from the RAML
+* Each and every one of our services will have it
+* HTML will be generated from RAML, so you don't have to read RAML.  Soon.
+
+Example RAML:
+https://github.com/SungevityCorp/design-platform-api/blob/develop/docs/api-docs/v1/raml/design_platform_api_v1.raml
+---
+# Jumping in: generating a test
+* Using the stub generator
+```python
+        cd QA-Code/apitesting
+        minion python ../general/scripts/stub.py
+```
+
+Will generate your skeleton test and write it out in the right directory.
+
+---
+# Filling In The Blanks
+Each of your tests should do this:
+  * add code to setUp, including the service_under_test
+  * add code to your test methods.  Specifically:
+    1.  perform an action with requests
+    2.  check results (api response?  salesforce?)
+    3.  assert that results are what you expect with hamcrest
+---
+# Some Examples Of Blanks Filled In
+---
+# A bare-bones test
+:![A Bare Bones Test](barebones.png)
+---
+# A bit more meat on the bones -- POST, relative URLs, testrail metadata
+:![A Test with auth and testrail info](auth_and_testrail.png)
+---
+# Genuser, and request headers for auth
+:![Test with genuser and auth](genuser_and_headers.png)
+---
+# Executing a query from salesforce
+:![Test with salesforce](salesforce.png)
+---
+# libraries and classes to know and love
+* The class your test extends is `APITestCase`
+* For submitting requests, we use the `requests` python library
+* For asserting stuff, we use `pyhamcrest`
+* See documentation for more details on these libraries
+---
+# In the APITestCase base class, some methods to know:
+  * setUp
+  * get_auth_headers(user, password)
+  * get_user(**criteria)
+  * ensure_status_code_for_response(resp, status)
+  * salesforce()
+  * url(path)
+---
+# Running your Test
+
+example:
+```python
+qaetest test/design-platform/design_platform_api_test.py
+```
+---
+# Committing and Pushing to github
+```sh
+
+         # update your repo
+        git fetch
+
+        # create your branch
+        git checkout -b my_branch origin/master
+
+        # add your test to be commmitted
+        git add test/myservice/my_service_test.py
+
+        # commit it
+        git commit -m "<jira_ticket_id>: My Description"
+
+        # push to github
+        git push origin my_branch
+```
+
+---
+# Tracking results in ATAT and Jenkins
+* If your test fails, it'll show up on ATAT
+* You can track your jenkins failure from there
+---
+# Documentation
+* Wiki: https://sungevity.atlassian.net/wiki/display/SQA/Writing+API+tests+in+Python
+
+* Sphinx API docs: https://qa-jenkins.qae.sungevity.com/job/documenatrix/lastSuccessfulBuild/artifact/documentation/sphinx/_build/html/apitesting/apitesting.html
+---
+      </textarea>
+    <script src="http://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
